@@ -375,9 +375,10 @@
 
 		place() {
 			let target = this.component ? this.component : this.element;
-			
-			this.picker.style.top = target.offsetTop + this.height + 'px';
-			this.picker.style.left = target.offsetLeft + 'px';
+			let rect = target.getBoundingClientRect();
+
+			this.picker.style.top = rect.top + this.height + 'px';
+			this.picker.style.left = rect.left + 'px';
 		}
 		
 		update(newDate) {
