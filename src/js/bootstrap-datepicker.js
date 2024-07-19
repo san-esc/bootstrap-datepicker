@@ -168,9 +168,9 @@
 	const headTemplate =
 		 '<thead>'+
 			'<tr>'+
-				'<th class="prev">&lsaquo;</th>'+
+				'<th class="prev"></th>'+
 				'<th colspan="5" class="switch"></th>'+
-				'<th class="next">&rsaquo;</th>'+
+				'<th class="next"></th>'+
 			'</tr>'+
 		'</thead>';
 	
@@ -281,6 +281,7 @@
 			this.showTime = options.showTime || defaults.showTime;
 			this.showButtons = options.showButtons || defaults.showButtons;
 			this.separator = options.separator || defaults.separator;
+			this.autoclose = options.autoclose;
 		}
 
 		initPicker() {
@@ -553,7 +554,8 @@
 							let year = parseInt(target.textContent, 10)||0;
 							this.viewDate.setFullYear(year);
 						}
-						if (this.viewMode !== 0) {
+
+						if (this.viewMode !== 0 && this.viewMode === this.minViewMode) {
 							this.date = new Date(this.viewDate);
 							this.element.dispatchEvent(new CustomEvent('changeDate', {
 								detail: {
@@ -561,6 +563,10 @@
 									viewMode: modes[this.viewMode].clsName
 								}								
 							}));
+
+							if (this.autoclose) {
+								this.hide();
+							}
 						}
 						this.showMode(-1);
 						this.fill();
@@ -586,11 +592,15 @@
 							this.set();
 
 							this.element.dispatchEvent(new CustomEvent('changeDate', {
-								details: {
+								detail: {
 									date: this.date,
 									viewMode: modes[this.viewMode].clsName
 								}
 							}));
+
+							if (this.autoclose) {
+								this.hide();
+							}
 						}
 						break;
 					case 'button':
@@ -643,6 +653,7 @@
 			timeFormat: 'HH:mm:ss',
 			language: 'en',
 			separator: ' ',
+			autoclose: false,
 			showTime: false,
 			showButtons: false,
 			onRender: function(date) {

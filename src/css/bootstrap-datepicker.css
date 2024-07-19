@@ -89,6 +89,12 @@
 .datepicker th.switch {
   width: 145px;
 }
+.datepicker th.prev::before {
+  content: "‹";
+}
+.datepicker th.next::before {
+  content: "›";
+}
 .datepicker th.next,
 .datepicker th.prev {
   font-size: 21px;
