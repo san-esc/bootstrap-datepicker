@@ -12,14 +12,6 @@
 		return template.content;
 	}
 
-	function isLeapYear(year) {
-		return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0))
-	}
-
-	function getDaysInMonth(year, month) {
-		return [31, (isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month]
-	}
-
 	function parseDateFormat(format) {
 		let separator = format.match(/[.\/\-\s].*?/),
 			parts = format.split(/\W+/);
@@ -436,24 +428,21 @@
 		}
 		
 		fill() {
-			let d = new Date(this.viewDate),
-				year = d.getFullYear(),
-				month = d.getMonth(),
-				hours = this.date.getHours(),
-				minutes = this.date.getMinutes(),
-				seconds = this.date.getSeconds(),
-				currentDate = this.date.valueOf();
+			let year = this.viewDate.getFullYear(),
+				month = this.viewDate.getMonth(),
+				currentDate = new Date(this.date).setHours(0, 0, 0, 0),
+				today = new Date().setHours(0, 0, 0, 0);
 
 			this.picker.querySelector('.datepicker-days .switch')
 				.textContent = this.language.months[month] + ' ' + year;
 			
-			let prevMonth = new Date(year, month-1, 28, hours, minutes, seconds, 0),
-				day = getDaysInMonth(prevMonth.getFullYear(), prevMonth.getMonth());
-			prevMonth.setDate(day);
-			prevMonth.setDate(day - (prevMonth.getDay() - this.weekStart + 7)%7);
-			let nextMonth = new Date(prevMonth);
-			nextMonth.setDate(nextMonth.getDate() + 42);
+			let prevMonth = new Date(year, month, 0);
+			prevMonth.setDate(prevMonth.getDate() - (prevMonth.getDay() - this.weekStart + 7) % 7);
+	
+			let nextMonth = new Date(year, month + 1, 1);
+			nextMonth.setDate(1 + (7 - nextMonth.getDay() + this.weekStart) % 7);
 			nextMonth = nextMonth.valueOf();
+
 			let html = [];
 			let clsName,
 				prevY,
@@ -472,6 +461,8 @@
 				}
 				if (prevMonth.valueOf() === currentDate) {
 					clsName += ' active';
+				} else if (prevMonth.valueOf() === today) {
+					clsName += ' today';
 				}
 				html.push('<td class="day '+clsName+'">'+prevMonth.getDate() + '</td>');
 				if (prevMonth.getDay() === this.weekEnd) {

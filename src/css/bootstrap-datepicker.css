@@ -64,6 +64,11 @@
   background-color: #007bff;
   border-color: #007bff;
 }
+.datepicker td.today,
+.datepicker td.today:hover {
+  background-color: #fff3cd;
+  border-color: #fff3cd;
+}
 .datepicker td span {
   display: block;
   width: 23%;
