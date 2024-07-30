@@ -80,7 +80,7 @@
 		if (timeFormat && timeParts) {
 			if (timeParts.length === timeFormat.parts.length) {
 				for (let i=0, cnt = timeFormat.parts.length; i < cnt; i++) {
-					val = parseInt(timeParts[i], 10)||1;
+					val = parseInt(timeParts[i], 10) || 0;
 					switch(timeFormat.parts[i]) {
 						case 'HH':
 						case 'H':
@@ -171,6 +171,8 @@
 	const timeTemplate =
 		'<div class="datepicker-time">' +
 			'<dl>' +
+				'<dt class="time-label"></dt>' + 
+				'<dd class="time"></dd>' +
 				'<dt class="hours"></dt>' + 
 				'<dd><input type="range" max="23" class="datepicker-slider hours" /></dd>' +
 				'<dt class="minutes"></dt>' + 
@@ -355,6 +357,10 @@
 				this.date.setMilliseconds(0);
 			}
 
+			if (!this.picker) {
+				this.initPicker();
+			}
+
 			this.viewDate = new Date(this.date);
 			this.viewDate.setDate(Math.min(28, this.date.getDay()));
 			
@@ -384,7 +390,7 @@
 			this.viewDate = new Date(this.date);
 			this.viewDate.setDate(1);
 
-			this.fill();
+			this.fill();			
 		}
 		
 		fillDow() {
@@ -413,6 +419,7 @@
 
 			this.picker.querySelector('.datepicker-days').append(timePicker);
 
+			timePicker.querySelector('dt.time-label').textContent = this.language.time;
 			timePicker.querySelector('dt.hours').textContent = this.language.hours;
 			timePicker.querySelector('dt.minutes').textContent = this.language.minutes;
 			timePicker.querySelector('dt.seconds').textContent = this.language.seconds;
@@ -511,6 +518,10 @@
 				sliders[0].value = this.date.getHours();
 				sliders[1].value = this.date.getMinutes();
 				sliders[2].value = this.date.getSeconds();
+
+				let time = formatTime(this.date, this.timeFormat);
+
+				this.picker.querySelector('.time').innerHTML = time;
 			}
 		}
 		
@@ -620,6 +631,9 @@
 				}
 	
 				this.set();
+
+				let time = formatTime(this.date, this.timeFormat);
+				this.picker.querySelector('.time').innerHTML = time;
 			}			
 		}
 
@@ -661,6 +675,7 @@
 				hours: 'Hours',
 				minutes: 'Minutes',
 				seconds: 'Seconds',
+				time: 'Time',
 				now: 'Now',
 				done: 'Done'
 			}

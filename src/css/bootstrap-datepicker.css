@@ -110,6 +110,9 @@
 .datepicker thead tr:first-child th:hover {
   background: #eeeeee;
 }
+.datepicker .datepicker-time {
+  margin-top: 20px;
+}
 .datepicker .datepicker-time dt {
   float: left;
   clear: left;
