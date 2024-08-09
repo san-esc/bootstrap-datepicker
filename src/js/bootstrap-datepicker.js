@@ -309,7 +309,6 @@
 			}
 
 			this.picker.style.display = 'block';
-			this.height = this.component ? this.component.offsetHeight : this.element.offsetHeight;
 			this.place();
 			
 			if (e) {
@@ -376,8 +375,39 @@
 			let target = this.component ? this.component : this.element;
 			let rect = target.getBoundingClientRect();
 
-			this.picker.style.top = rect.top + this.height + 'px';
-			this.picker.style.left = rect.left + 'px';
+			let top = rect.top + target.offsetHeight,
+				bottom = top + this.picker.offsetHeight,
+				left = rect.left,
+				right = rect.left + this.picker.offsetWidth;
+
+			let orientations = [];
+
+			if (bottom > window.innerHeight && rect.top - this.picker.offsetHeight >= 0) {
+				top = rect.top - this.picker.offsetHeight - 5;
+
+				orientations.push('top');
+			} else {
+				orientations.push('bottom');
+			}
+
+			if (right > window.innerWidth && window.innerWidth - this.picker.offsetWidth >= 0) {
+				left = window.innerWidth - this.picker.offsetWidth;
+
+				orientations.push('right');
+			} else {
+				orientations.push('left');
+			}
+
+			this.picker.style.top = top + 'px';
+			this.picker.style.left = left + 'px';
+
+			this.picker.classList.forEach(cls => {
+				if (cls.indexOf('datepicker-') !== -1) {
+					this.picker.classList.remove(cls);
+				}
+			});
+
+			orientations.forEach(cls => this.picker.classList.add('datepicker-' + cls));
 		}
 		
 		update(newDate) {
