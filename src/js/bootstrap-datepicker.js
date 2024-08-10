@@ -212,17 +212,7 @@
 
 	class Datepicker {
 		constructor(element, options) {
-			let defaults = Datepicker.defaults;
-			options = options || {}
-
 			this.element = element;
-			
-			this.format = parseDateFormat(
-				element.dataset.dateFormat || options.dateFormat || defaults.dateFormat);
-			this.timeFormat = options.showTime && parseTimeFormat(
-				element.dataset.timeFormat || options.timeFormat || defaults.timeFormat);
-
-			this.language = Datepicker.languages[options.language || defaults.language];
 
 			this.isInput = this.element.nodeName.toLowerCase() === 'input';
 			this.component = this.element.classList.contains('date') 
@@ -239,6 +229,20 @@
 					this.element.addEventListener('click', this.show.bind(this));
 				}
 			}
+
+			this.loadOptions(options);
+		}
+
+		loadOptions(options) {
+			let defaults = Datepicker.defaults;
+			options = options || {}
+	
+			this.format = parseDateFormat(
+				this.element.dataset.dateFormat || options.dateFormat || defaults.dateFormat);
+			this.timeFormat = options.showTime && parseTimeFormat(
+				this.element.dataset.timeFormat || options.timeFormat || defaults.timeFormat);
+
+			this.language = Datepicker.languages[options.language || defaults.language];
 		
 			this.minViewMode = options.minViewMode || 0;
 			if (typeof this.minViewMode === 'string') {
@@ -247,7 +251,8 @@
 						this.minViewMode = 1;
 						break;
 					case 'years':
-						this.minViewMode = 2;
+						this.minViewMode = 2;this.fillDow();
+						this.fillMonths();
 						break;
 					default:
 						this.minViewMode = 0;
@@ -276,6 +281,14 @@
 			this.showButtons = options.showButtons || defaults.showButtons;
 			this.separator = options.separator || defaults.separator;
 			this.autoclose = options.autoclose;
+
+			if (this.picker) {			
+				this.toggleTime();
+				this.toggleButtons();
+
+				this.updateTarget();
+				this.fill();
+			}
 		}
 
 		initPicker() {
@@ -285,20 +298,14 @@
 			this.fillDow();
 			this.fillMonths();
 			
-			if (this.showTime) this.fillTime();
-			if (this.showButtons) this.fillButtons();
+			this.toggleTime();
+			this.toggleButtons();
 			
 			this.picker.addEventListener('click', this.onClick.bind(this));
 			this.picker.addEventListener('input', this.onInput.bind(this));
 
 			window.addEventListener('resize', this.place.bind(this));
-			
-			let self = this;
-			document.addEventListener('mousedown', ev => {
-				if (ev.target.closest('.datepicker') === null) {				
-					self.hide();
-				}
-			});
+			document.addEventListener('mousedown', this.onMouseDown.bind(this));
 		}
 			
 		show(e) {
@@ -413,7 +420,7 @@
 
 			orientations.forEach(cls => this.picker.classList.add('datepicker-' + cls));
 		}
-		
+
 		updateDate() {
 			this.date = parseDateTime(
 				this.isInput ? this.element.value : this.element.dataset.date,
@@ -452,24 +459,41 @@
 				.append(createElementFromHtml(html));
 		}
 
-		fillTime() {
-			let timePicker = createElementFromHtml(timeTemplate).firstElementChild;
+		toggleTime() {
+			let dayPicker = this.picker.querySelector('.datepicker-days'),
+				timePicker = dayPicker.querySelector('.datepicker-time'); 
+			
+			if (this.showTime) {
+				if (!timePicker) {
+					timePicker = createElementFromHtml(timeTemplate).firstElementChild;
+					dayPicker.append(timePicker);
+				}
 
-			this.picker.querySelector('.datepicker-days').append(timePicker);
-
-			timePicker.querySelector('dt.time-label').textContent = this.language.time;
-			timePicker.querySelector('dt.hours').textContent = this.language.hours;
-			timePicker.querySelector('dt.minutes').textContent = this.language.minutes;
-			timePicker.querySelector('dt.seconds').textContent = this.language.seconds;
+				timePicker.querySelector('dt.time-label').textContent = this.language.time;
+				timePicker.querySelector('dt.hours').textContent = this.language.hours;
+				timePicker.querySelector('dt.minutes').textContent = this.language.minutes;
+				timePicker.querySelector('dt.seconds').textContent = this.language.seconds;
+			} else if (timePicker) {
+				dayPicker.removeChild(timePicker);
+			}
 		}
 
-		fillButtons() {
-			let buttonPane = createElementFromHtml(buttonsTemplate).firstElementChild;
-			this.picker.querySelector('.datepicker-days').append(buttonPane);
+		toggleButtons() {
+			let dayPicker = this.picker.querySelector('.datepicker-days'),
+				buttonPane = dayPicker.querySelector('.datepicker-buttonpane');
 
-			buttonPane.querySelector('button.now').textContent = this.language.now;
-			buttonPane.querySelector('button.done').textContent = this.language.done;
-			buttonPane.style.display = 'block';
+			if (this.showButtons) {
+				if (!buttonPane) {
+					buttonPane = createElementFromHtml(buttonsTemplate).firstElementChild;
+					dayPicker.append(buttonPane);
+				}
+	
+				buttonPane.querySelector('button.now').textContent = this.language.now;
+				buttonPane.querySelector('button.done').textContent = this.language.done;
+				buttonPane.style.display = 'block';
+			} else if (buttonPane) {
+				dayPicker.removeChild(buttonPane);
+			}
 		}
 		
 		fill() {
@@ -675,9 +699,10 @@
 			}			
 		}
 
-		mousedown(e) {
-			e.stopPropagation();
-			e.preventDefault();
+		onMouseDown(e) {
+			if (e.target.closest('.datepicker') === null) {				
+				this.hide();
+			}
 		}
 		
 		showMode(dir) {
