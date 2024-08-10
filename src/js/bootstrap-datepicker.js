@@ -379,15 +379,15 @@
 			let target = this.component ? this.component : this.element;
 			let rect = target.getBoundingClientRect();
 
-			let top = rect.top + target.offsetHeight,
-				bottom = top + this.picker.offsetHeight,
+			let top = rect.top + target.offsetHeight + window.scrollY,
+				bottom = rect.top + this.picker.offsetHeight,
 				left = rect.left,
 				right = rect.left + this.picker.offsetWidth;
 
 			let orientations = [];
 
 			if (bottom > window.innerHeight && rect.top - this.picker.offsetHeight >= 0) {
-				top = rect.top - this.picker.offsetHeight - 5;
+				top = window.scrollY + rect.top - this.picker.offsetHeight - 5;
 
 				orientations.push('top');
 			} else {
@@ -405,11 +405,11 @@
 			this.picker.style.top = top + 'px';
 			this.picker.style.left = left + 'px';
 
-			this.picker.classList.forEach(cls => {
-				if (cls.indexOf('datepicker-') !== -1) {
-					this.picker.classList.remove(cls);
+			for (let i = this.picker.classList.length - 1; i >= 0; i--) {
+				if (this.picker.classList[i].startsWith('datepicker-')) {
+					this.picker.classList.remove(this.picker.classList[i]);
 				}
-			});
+			}
 
 			orientations.forEach(cls => this.picker.classList.add('datepicker-' + cls));
 		}
