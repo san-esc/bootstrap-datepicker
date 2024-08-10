@@ -231,7 +231,7 @@
 			
 			if (this.isInput) {
 				this.element.addEventListener('focus', this.show.bind(this));
-				this.element.addEventListener('keyup', this.update.bind(this));
+				this.element.addEventListener('keyup', this.updatePicker.bind(this));
 			} else {
 				if (this.component){
 					this.component.addEventListener('click', this.show.bind(this));
@@ -304,7 +304,7 @@
 		show(e) {
 			if (!this.picker) {
 				this.initPicker();
-				this.update();
+				this.updatePicker();
 				this.showMode();
 			}
 
@@ -331,7 +331,7 @@
 			}));
 		}
 		
-		set() {
+		updateTarget() {
 			let formated = formatDate(this.date, this.format);
 
 			if (this.showTime) {
@@ -364,10 +364,14 @@
 			this.viewDate.setDate(Math.min(28, this.date.getDay()));
 			
 			this.fill();
-			this.set();
+			this.updateTarget();
 		}
 
 		getDate () {
+			if (this.date === undefined) {
+				this.updateDate();
+			}
+
 			return this.date;
 		}
 
@@ -410,13 +414,17 @@
 			orientations.forEach(cls => this.picker.classList.add('datepicker-' + cls));
 		}
 		
-		update(newDate) {
+		updateDate() {
 			this.date = parseDateTime(
-				typeof newDate === 'string' ? newDate : (this.isInput ? this.element.value : this.element.dataset.date),
+				this.isInput ? this.element.value : this.element.dataset.date,
 				this.format,
 				this.timeFormat,
 				this.separator
 			);
+		}
+		
+		updatePicker() {
+			this.updateDate();
 			this.viewDate = new Date(this.date);
 			this.viewDate.setDate(1);
 
@@ -574,7 +582,7 @@
 									modes[this.viewMode].navStep * (target.className === 'prev' ? -1 : 1)
 								);
 								this.fill();
-								this.set();
+								this.updateTarget();
 								break;
 						}
 						break;
@@ -602,7 +610,7 @@
 						}
 						this.showMode(-1);
 						this.fill();
-						this.set();
+						this.updateTarget();
 						break;
 					case 'td':
 						if (target.classList.contains('day') && !target.classList.contains('disabled')){
@@ -621,7 +629,7 @@
 							this.date = new Date(year, month, day, hours, mins, secs, 0);
 							this.viewDate = new Date(year, month, Math.min(28, day), hours, mins, secs, 0);
 							this.fill();
-							this.set();
+							this.updateTarget();
 
 							this.element.dispatchEvent(new CustomEvent('changeDate', {
 								detail: {
