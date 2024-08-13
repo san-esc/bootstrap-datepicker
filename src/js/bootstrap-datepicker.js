@@ -288,7 +288,7 @@
 			this.showTime = options.showTime || defaults.showTime;
 			this.showButtons = options.showButtons || defaults.showButtons;
 			this.separator = options.separator || defaults.separator;
-			this.autoclose = options.autoclose;
+			this.autoclose = options.autoclose || defaults.autoclose;
 
 			if (this.picker) {			
 				this.toggleTime();
@@ -700,7 +700,7 @@
 					this.date.setSeconds(value);
 				}
 	
-				this.set();
+				this.updateTarget();
 
 				let time = formatTime(this.date, this.timeFormat);
 				this.picker.querySelector('.time').innerHTML = time;
@@ -722,6 +722,42 @@
 			
 			this.picker.querySelector('.datepicker-'+modes[this.viewMode].clsName)
 				.style.display = 'block';
+		}
+
+		static formatDate(format, date) {
+			return formatDate(date, parseDateFormat(format));
+		}
+
+		static formatDateTime(format, date) {
+			let separator = format.match(/[\sT].*?/);
+
+			if (!separator) {
+				throw new Error('Invalid datetime format');
+			}
+
+			let parts = format.split(separator),
+				dateFormat = parseDateFormat(parts[0]),
+				timeFormat = parseTimeFormat(parts[1]);
+			
+			return formatDate(date, dateFormat) + separator + formatTime(date, timeFormat);
+		}
+
+		static parseDate(format, value) {
+			return parseDateTime(value, parseDateFormat(format), null, null);
+		}
+
+		static parseDateTime(format, value) {
+			let separator = format.match(/[\sT].*?/);
+
+			if (!separator) {
+				throw new Error('Invalid datetime format');
+			}
+
+			let parts = format.split(separator),
+				dateFormat = parseDateFormat(parts[0]),
+				timeFormat = parseTimeFormat(parts[1]);
+
+			return parseDateTime(value, dateFormat, timeFormat, separator);
 		}
 
 		static defaults = {
@@ -779,7 +815,13 @@
 
 		$.fn.datepicker.defaults = Datepicker.defaults;
 		$.fn.datepicker.languages = Datepicker.languages;
-		$.fn.datepicker.Constructor = Datepicker;
+
+		$.datepicker = {
+			formatDate: Datepicker.formatDate,
+			formatDateTime: Datepicker.formatDateTime,
+			parseDate: Datepicker.parseDate,
+			parseDateTime: Datepicker.parseDateTime
+		};
 	}
 
 	global.Datepicker = Datepicker;
