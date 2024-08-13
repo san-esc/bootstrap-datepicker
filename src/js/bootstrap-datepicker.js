@@ -107,18 +107,26 @@
 	}
 	
 	function formatDate(date, format) {
+		let lang = Datepicker.languages[Datepicker.defaults.language];
+
 		let val = {
 			d: date.getDate(),
 			m: date.getMonth() + 1,
 			yy: date.getFullYear().toString().substring(2),
-			yyyy: date.getFullYear()
+			yyyy: date.getFullYear(),
+			M: lang.monthsShort[date.getMonth()],
+			MM: lang.months[date.getMonth()],
 		};
+
 		val.dd = (val.d < 10 ? '0' : '') + val.d;
 		val.mm = (val.m < 10 ? '0' : '') + val.m;
+
 		let parts = [];
+
 		for (let i=0, cnt = format.parts.length; i < cnt; i++) {
 			parts.push(val[format.parts[i]]);
 		}
+
 		return parts.join(format.separator);
 	}
 
