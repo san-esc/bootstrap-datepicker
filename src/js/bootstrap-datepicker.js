@@ -264,8 +264,7 @@
 						this.minViewMode = 1;
 						break;
 					case 'years':
-						this.minViewMode = 2;this.fillDow();
-						this.fillMonths();
+						this.minViewMode = 2;
 						break;
 					default:
 						this.minViewMode = 0;
@@ -293,7 +292,8 @@
 			this.showTime = options.showTime || defaults.showTime;
 			this.showButtons = options.showButtons || defaults.showButtons;
 			this.separator = options.separator || defaults.separator;
-			this.autoclose = options.autoclose || defaults.autoclose;
+			this.autoclose = options.autoclose ?? defaults.autoclose;
+			this.enabled = true;
 
 			if (this.picker) {			
 				this.toggleTime();
@@ -322,6 +322,10 @@
 		}
 			
 		show(e) {
+			if (!this.enabled) {
+				return;
+			}
+
 			if (!this.picker) {
 				this.initPicker();
 				this.updatePicker();
@@ -353,11 +357,11 @@
 		
 		updateTarget() {
 			let formated = formatDate(this.date, this.format);
-
+			
 			if (this.showTime) {
 				formated += this.separator + formatTime(this.date, this.timeFormat);
 			}
-
+			
 			if (!this.isInput) {
 				if (this.component){
 					this.element.querySelector('input').value = formated;
@@ -366,6 +370,10 @@
 			} else {
 				this.element.value = formated;
 			}
+		}
+
+		setEnabled(enabled) {
+			this.enabled = enabled;
 		}
 		
 		setDate(newDate) {
