@@ -629,12 +629,8 @@
 
 						if (this.viewMode !== 0 && this.viewMode === this.minViewMode) {
 							this.date = new Date(this.viewDate);
-							this.element.dispatchEvent(new CustomEvent('changeDate', {
-								detail: {
-									date: this.date,
-									viewMode: modes[this.viewMode].clsName
-								}								
-							}));
+
+							this.element.dispatchEvent(new Event('change'));
 
 							if (this.autoclose) {
 								this.hide();
@@ -663,12 +659,7 @@
 							this.fill();
 							this.updateTarget();
 
-							this.element.dispatchEvent(new CustomEvent('changeDate', {
-								detail: {
-									date: this.date,
-									viewMode: modes[this.viewMode].clsName
-								}
-							}));
+							this.element.dispatchEvent(new Event('change'));
 
 							if (this.autoclose) {
 								this.hide();
@@ -701,6 +692,8 @@
 				}
 	
 				this.updateTarget();
+
+				this.element.dispatchEvent(new Event('change'));
 
 				let time = formatTime(this.date, this.timeFormat);
 				this.picker.querySelector('.time').innerHTML = time;
