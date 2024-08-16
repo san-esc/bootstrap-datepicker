@@ -231,19 +231,49 @@
 			this.component = this.element.classList.contains('date') 
 				? this.element.querySelector('.add-on')
 				: false;
-			
-			if (this.isInput) {
-				this.element.addEventListener('focus', this.show.bind(this));
-				this.element.addEventListener('keyup', this.updatePicker.bind(this));
-			} else {
-				if (this.component){
-					this.component.addEventListener('click', this.show.bind(this));
-				} else {
-					this.element.addEventListener('click', this.show.bind(this));
-				}
-			}
 
 			this.loadOptions(options);
+			this.bindEvents();
+		}
+
+		bindEvents() {
+			this.events = [];
+
+			if (this.isInput) {
+				this.events.push({
+					target: this.element,
+					type: 'focus',
+					listener: this.show.bind(this)
+				});
+
+				this.events.push({
+					target: this.element,
+					type: 'keyup',
+					listener: this.updatePicker.bind(this)
+				});
+			} else {
+				this.events.push({
+					target: this.component ? this.component : this.element,
+					type: 'click',
+					listener: this.show.bind(this)
+				});
+			}
+
+			let self = this;
+
+			this.events.push({ target: window, type: 'resize', listener: this.place.bind(this) });
+
+			this.events.push({
+				target: document,
+				type: 'mousedown',
+				listener: function (e) {
+					if (self.picker && e.target.closest('.datepicker') === null) {
+						self.hide();
+					}
+				}
+			});
+
+			this.events.forEach(e => e.target.addEventListener(e.type, e.listener));
 		}
 
 		loadOptions(options) {
@@ -316,9 +346,6 @@
 			
 			this.picker.addEventListener('click', this.onClick.bind(this));
 			this.picker.addEventListener('input', this.onInput.bind(this));
-
-			window.addEventListener('resize', this.place.bind(this));
-			document.addEventListener('mousedown', this.onMouseDown.bind(this));
 		}
 			
 		show(e) {
@@ -354,7 +381,21 @@
 				detail: { date: this.date } 
 			}));
 		}
-		
+
+		destroy() {
+			if (this.picker) {
+				this.hide();
+				document.body.removeChild(this.picker);
+				delete this.picker;
+			}
+
+			if (!this.isInput) {
+				delete this.element.dataset.date
+			}
+
+			this.events.forEach(e => e.target.removeEventListener(e.type, e.listener));
+		}
+
 		updateTarget() {
 			let formated = formatDate(this.date, this.format);
 			
@@ -404,6 +445,10 @@
 		}
 
 		place() {
+			if (!this.picker) {
+				return;
+			}
+
 			let target = this.component ? this.component : this.element;
 			let rect = target.getBoundingClientRect();
 
@@ -713,12 +758,6 @@
 			}			
 		}
 
-		onMouseDown(e) {
-			if (e.target.closest('.datepicker') === null) {				
-				this.hide();
-			}
-		}
-		
 		showMode(dir) {
 			if (dir) {
 				this.viewMode = Math.max(this.minViewMode, Math.min(2, this.viewMode + dir));
@@ -805,6 +844,10 @@
 				} else {
 					return this.each(function () {
 						$(this).data('datepicker')[option](val);
+
+						if (option === 'destroy') {
+							delete $(this).data().datepicker;
+						}
 					});
 				}
 			} else {
