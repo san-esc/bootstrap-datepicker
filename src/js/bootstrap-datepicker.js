@@ -267,7 +267,10 @@
 				target: document,
 				type: 'mousedown',
 				listener: function (e) {
-					if (self.picker && e.target.closest('.datepicker') === null) {
+					if (self.picker && 
+						self.picker.style.display === 'block' &&
+						e.target.closest('.datepicker') === null
+					) {
 						self.hide();
 					}
 				}
