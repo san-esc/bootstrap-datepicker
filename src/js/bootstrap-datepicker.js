@@ -358,10 +358,11 @@
 
 			if (!this.picker) {
 				this.initPicker();
-				this.updatePicker();
 				this.showMode();
 			}
-
+			
+			this.updatePicker();
+			
 			this.picker.style.display = 'block';
 			this.place();
 			
