@@ -456,16 +456,20 @@
 			let target = this.component ? this.component : this.element;
 			let rect = target.getBoundingClientRect();
 
-			let top = rect.top + target.offsetHeight + window.scrollY,
-				bottom = rect.top + this.picker.offsetHeight,
+			let top = rect.bottom,
+				bottom = rect.bottom + this.picker.offsetHeight,
 				left = rect.left,
 				right = rect.left + this.picker.offsetWidth;
 
 			let orientations = [];
 
-			if (bottom > window.innerHeight && rect.top - this.picker.offsetHeight >= 0) {
-				top = window.scrollY + rect.top - this.picker.offsetHeight - 5;
+			if (bottom - 20 > window.innerHeight) {
+				top = rect.top - this.picker.offsetHeight;
 
+				if (top + 20 < 0) {
+					top = (window.innerHeight - this.picker.offsetHeight) / 2;
+				}
+				
 				orientations.push('top');
 			} else {
 				orientations.push('bottom');
@@ -478,6 +482,8 @@
 			} else {
 				orientations.push('left');
 			}
+
+			top += window.scrollY;
 
 			this.picker.style.top = top + 'px';
 			this.picker.style.left = left + 'px';
