@@ -9,7 +9,6 @@
   top: 0;
   left: 0;
   padding: 4px;
-  margin-top: 1px;
   border-radius: 4px;
 }
 .datepicker:before {
@@ -20,6 +19,12 @@
   border-bottom: 7px solid #ccc;
   border-bottom-color: rgba(0, 0, 0, 0.2);
   position: absolute;
+}
+.datepicker-top {
+  margin-top: -1px;
+}
+.datepicker-bottom {
+  margin-top: 1px;
 }
 .datepicker.datepicker-left:before {
   left: 6px;
